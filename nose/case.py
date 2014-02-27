@@ -197,13 +197,36 @@ class TestBase(unittest.TestCase):
         self.test(*self.arg)
 
     def shortDescription(self):
+        # We cache the description because of the way we advocate people
+        # set the description for their test.  The set up is typically
+        # something like:
+        #
+        #   def test_generator():
+        #       def func(arg):
+        #           assert ...
+        #       for i in range(10):
+        #           func.description = "test_generator_%d" % i
+        #           yield func, i
+        #
+        # This appears to work early on, but it fails when generating the report
+        # summary at the end of the run.  To prevent it from getting
+        # out-of-sync, we'll go ahead and cache the description the first time
+        # through.
+        if hasattr(self, '_cached_description'):
+            return self._cached_description
+
         if hasattr(self.test, 'description'):
-            return self.test.description
-        func, arg = self._descriptors()
-        doc = getattr(func, '__doc__', None)
-        if not doc:
-            doc = str(self)
-        return doc.strip().split("\n")[0].strip()
+            description = self.test.description
+        else:
+            func, arg = self._descriptors()
+            doc = getattr(func, '__doc__', None)
+            if not doc:
+                doc = str(self)
+            description = doc.strip().split("\n")[0].strip()
+
+        self._cached_description = description
+
+        return description
 
 
 class FunctionTestCase(TestBase):
