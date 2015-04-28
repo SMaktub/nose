@@ -131,11 +131,11 @@ class Test(unittest.TestCase):
             try:
                 self.beforeTest(result)
                 self.runTest(result)
-            except KeyboardInterrupt:
-                raise
             except:
                 err = sys.exc_info()
                 result.addError(self, err)
+                if isinstance(err[1], KeyboardInterrupt):
+                    result.shouldStop = True
         finally:
             self.afterTest(result)
 

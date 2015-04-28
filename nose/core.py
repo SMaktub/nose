@@ -58,10 +58,7 @@ class TextTestRunner(unittest.TextTestRunner):
 
         result = self._makeResult()
         start = time.time()
-        try:
-            test(result)
-        except KeyboardInterrupt:
-            pass
+        test(result)
         stop = time.time()
         result.printErrors()
         result.printSummary(start, stop)
